@@ -8,7 +8,7 @@ local navic = require("nvim-navic")
 require("lualine").setup({
   options = {
     theme = "auto",
-    globalstatus = true,
+    globalstatus = false,
 
     disabled_filetypes = {
       winbar = {
@@ -17,17 +17,12 @@ require("lualine").setup({
     },
   },
 
-  sections = {
-    lualine_a = { "mode" },
-    lualine_b = { "branch", "diff", "diagnostics" },
-    lualine_c = {},
-
-    lualine_x = { "lsp_status", "filetype" },
-    lualine_y = { "progress" },
-    lualine_z = { "location" },
-  },
+  sections = {},
+  inactive_sections = {},
 
   winbar = {
+    lualine_x = { "branch", "diff", "diagnostics" },
+    lualine_z = { "mode" },
     lualine_c = {
       {
         "filename",
@@ -59,3 +54,6 @@ require("lualine").setup({
     },
   },
 })
+
+-- Keep status information in the winbar without an empty bar at the bottom.
+vim.opt.laststatus = 0
