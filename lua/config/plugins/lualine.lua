@@ -57,3 +57,22 @@ require("lualine").setup({
 
 -- Keep status information in the winbar without an empty bar at the bottom.
 vim.opt.laststatus = 0
+
+-- Other splits still have status lines; render them as plain dividers.
+local function set_divider_highlight()
+  local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  local separator = vim.api.nvim_get_hl(0, { name = "WinSeparator", link = false })
+  vim.api.nvim_set_hl(0, "SplitDivider", {
+    fg = separator.fg or normal.fg,
+    bg = normal.bg or "NONE",
+  })
+end
+
+set_divider_highlight()
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("SplitDividerHighlight", { clear = true }),
+  callback = set_divider_highlight,
+})
+
+vim.opt.statusline = "%#SplitDivider#%="
+vim.opt.fillchars:append({ stl = "─", stlnc = "─" })
