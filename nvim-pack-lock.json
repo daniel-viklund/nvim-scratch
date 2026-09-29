@@ -53,6 +53,11 @@
       "rev": "ec0575bdb63594c5e7fba6eb9607b009aa1fb74e",
       "src": "https://github.com/ramojus/mellifluous.nvim.git"
     },
+    "multicursor.nvim": {
+      "rev": "704b99f10a72cc05d370cfeb294ff83412a8ab55",
+      "src": "https://github.com/jake-stewart/multicursor.nvim",
+      "version": "'1.0'"
+    },
     "netcoredbg-macOS-arm64.nvim": {
       "rev": "90c6fe7fa864cd753670fcd95b229da261760bc1",
       "src": "https://github.com/Cliffback/netcoredbg-macOS-arm64.nvim"

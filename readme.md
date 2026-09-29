@@ -28,6 +28,25 @@ To disable a plugin, rename its file from `.lua` to `.lua.disabled` and restart.
 Snacks is already disabled this way. To enable it, rename `snacks.lua.disabled`
 back to `snacks.lua`. Disabled plugins stay installed and in the lockfile.
 
+## Multiple cursors
+
+`lua/config/plugins/multicursor.lua` configures
+[multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim) with gold
+secondary cursors. The highlights are reapplied when the colorscheme changes.
+
+Select a block with `Ctrl-v`, then press `I` to insert or `A` to append at each
+selected line. These mappings also work with linewise and characterwise visual
+selections. The extra insertion points stay highlighted while you type; the
+text is repeated on the other lines when you leave Insert mode. Press `Esc`
+(or your existing `jk` mapping) to leave Insert mode, then `Esc` again to clear
+the extra cursors and search highlighting.
+
+| Mapping | Action (Normal or Visual mode) |
+| --- | --- |
+| `Space mj` / `Space mk` | Add a cursor below / above |
+| `Space mn` / `Space mN` | Add the next / previous matching word or selection |
+| `Space ma` | Add cursors at all matching words or selections |
+
 ## Install
 
 Download or clone this entire config, then run the installer from its directory.
