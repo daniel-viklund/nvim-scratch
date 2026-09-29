@@ -163,15 +163,41 @@ installed server is enabled in the current session; already-installed servers
 are enabled on startup. Your server settings and LSP keymaps remain in
 `lua/config/plugins/lsp.lua`.
 
-Packages without an LSP mapping need manual configuration. Non-LSP tools such as
-debug adapters and standalone formatters need their own setup. This checkout has no DAP
-plugin/configuration; installing an adapter in Mason alone does not configure
-a debugger UI. See [mason-lspconfig's documentation](https://github.com/mason-org/mason-lspconfig.nvim#configuration).
+Packages without an LSP mapping need separate configuration. Debug adapters
+are configured below; standalone formatters still need their own setup. See
+[mason-lspconfig's documentation](https://github.com/mason-org/mason-lspconfig.nvim#configuration).
+
+## Debugging
+
+`lua/config/plugins/nvim-dap.lua` contains the DAP plugins, UI, keymaps, and
+adapter setup. Its filename makes it load after `mason.lua`.
+
+- **Rust:** Mason installs `codelldb` and supplies launch configurations. Build
+  your program with `cargo build`, press `F5`, and select the executable under
+  `target/debug/` (with `.exe` on Windows).
+- **Go:** Mason installs `delve`; `nvim-dap-go` supplies launch and test
+  configurations. Install Go separately to build Delve and debug Go projects.
+- **C# on Apple Silicon macOS:** uses the bundled native adapter from
+  [netcoredbg-macOS-arm64.nvim](https://github.com/Cliffback/netcoredbg-macOS-arm64.nvim),
+  including the existing DLL prompt and environment handling.
+- **C# on Windows:** Mason installs standard `netcoredbg` through the `coreclr`
+  adapter. The Mac adapter is not loaded. Install the .NET SDK separately and
+  run `dotnet build` before launching a DLL from `bin/Debug/`.
+
+Adapter selection follows the operating system and CPU architecture automatically.
+Mason installs missing adapters during startup; let installation finish before
+starting a debug session. Plugin revisions are pinned in `nvim-pack-lock.json`.
+
+`F5` starts/continues, `F9` toggles a breakpoint, `F10` steps over, `F11` steps
+into, and `F12` steps out. The existing `Space d` mappings are preserved:
+`dc` continue, `db` breakpoint, `dB` conditional breakpoint, `dt` terminate,
+`de` evaluate, and `du` toggle the UI. The UI opens when a session initializes
+and closes when it ends.
 
 ## Verify and troubleshoot
 
 ```vim
-:checkhealth vim.pack nvim-treesitter mason telescope blink.cmp
+:checkhealth vim.pack nvim-treesitter mason telescope blink.cmp dap
 :LazyGit
 ```
 
