@@ -22,14 +22,10 @@ vim.keymap.set('n', '<F11>', function() require('dap').step_into() end, { desc =
 vim.keymap.set('n', '<F10>', function() require('dap').step_over() end, { desc = 'Debug: Step Over' })
 vim.keymap.set('n', '<F12>', function() require('dap').step_out() end, { desc = 'Debug: Step Out' })
 vim.keymap.set('n', '<F9>', function() require('dap').toggle_breakpoint() end, { desc = 'Debug: Toggle Breakpoint' })
+-- <C-F9> gets recieved as F33 by nvim
+vim.keymap.set('n', '<F33>', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, { desc = 'Debug: Conditional Breakpoint' })
 
 -- Debugging keymaps under <leader>d
-vim.keymap.set('n', '<leader>dc', function() require('dap').continue() end, { desc = 'Debug: Start/Continue' })
-vim.keymap.set('n', '<leader>di', function() require('dap').step_into() end, { desc = 'Debug: Step Into' })
-vim.keymap.set('n', '<leader>do', function() require('dap').step_over() end, { desc = 'Debug: Step Over' })
-vim.keymap.set('n', '<leader>dO', function() require('dap').step_out() end, { desc = 'Debug: Step Out' })
-vim.keymap.set('n', '<leader>db', function() require('dap').toggle_breakpoint() end, { desc = 'Debug: Toggle Breakpoint' })
-vim.keymap.set('n', '<leader>dB', function() require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ') end, { desc = 'Debug: Conditional Breakpoint' })
 vim.keymap.set('n', '<leader>dt', function() require('dap').terminate() end, { desc = 'Debug: Terminate' })
 -- Evaluate expressions: word under cursor (normal) or selection (visual).
 -- Press <leader>de a second time to jump into the float and expand values.
