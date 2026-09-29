@@ -1,2 +1,165 @@
-brew install tree-sitter-cli
+# Neovim config
 
+Requires Neovim **0.12 or newer**. Plugins are managed by `vim.pack` and pinned
+in `nvim-pack-lock.json`. Language servers, debug adapters, formatters, and
+linters are managed by Mason.
+
+## Install
+
+Download or clone this entire config, then run the installer from its directory.
+Both installers default to the standard `nvim` app name and support a dry run.
+They reuse available tools, install missing dependencies, copy the config,
+install the locked plugins, wait for Tree-sitter parsers to compile, and install
+`lua-language-server` and `rust-analyzer` through Mason. Lua and Rust LSP support
+are enabled in the config. Stable Rust, rustfmt, and Clippy are installed through
+rustup for development and Blink's native matcher.
+
+An existing destination config is renamed to a sibling
+`nvim.backup-<timestamp>-<pid>` directory before the new copy is activated.
+Data, caches, and Mason packages are retained. If the source is already the
+destination, files stay in place. Rerunning is supported; it does not update
+locked plugin revisions. Changes to the source require rerunning the installer
+because the destination is a copy, not a symlink.
+
+### macOS
+
+```sh
+bash scripts/install-macos.sh --dry-run
+bash scripts/install-macos.sh
+```
+
+Uses Homebrew, installing it through its official installer if needed. Homebrew
+may ask for your password. A C compiler comes from Apple's Command Line Tools;
+if the system installation dialog opens, finish it and rerun the script.
+Follow Homebrew's shell setup instructions if it was newly installed. Rustup
+uses its official installer if absent; open a new shell afterward so Cargo is
+on PATH. Existing default Rust toolchains are preserved.
+
+To keep the `nvim-scratch` app name and its separate plugins/Mason packages:
+
+```sh
+bash scripts/install-macos.sh --appname nvim-scratch
+NVIM_APPNAME=nvim-scratch nvim
+```
+
+The default destination is `~/.config/nvim` (or `$XDG_CONFIG_HOME/nvim`).
+
+### Windows 10/11, x64
+
+Run in PowerShell 5.1 or newer. Requires [WinGet/App Installer](https://aka.ms/getwinget).
+Individual installers may request administrator elevation.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1 -DryRun
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1
+```
+
+The execution policy applies only to that invocation. The script refreshes its
+PATH after package installation. If an older executable still shadows the new
+one, correct PATH and rerun in a new terminal.
+
+For the separate `nvim-scratch` installation:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1 -AppName nvim-scratch
+$env:NVIM_APPNAME = 'nvim-scratch'
+nvim
+```
+
+The default destination is `%LOCALAPPDATA%\nvim` (or `$env:XDG_CONFIG_HOME\nvim`).
+The script reuses GCC or installs WinLibs GCC. It installs the stable
+`x86_64-pc-windows-gnu` Rust toolchain, sharing GCC between Rust and Tree-sitter.
+Blink explicitly builds with that toolchain. Existing default Rust toolchains
+are preserved; a new rustup installation defaults to GNU Rust. Neovim selects
+GCC for Tree-sitter if `CC` is unset.
+
+This avoids installing Visual Studio Build Tools for this config. Rust projects
+that interoperate with MSVC libraries can still require the MSVC toolchain and
+Windows SDK; see [Rust's Windows toolchain guidance](https://rust-lang.github.io/rustup/installation/windows.html).
+
+Archive-tool directories are recorded in `windows-path.txt` in the installed
+config and added only to Neovim's PATH. This file contains machine-specific
+paths and should not be copied between computers.
+
+## Dependency audit
+
+| Tool | Why it is needed | macOS | Windows |
+| --- | --- | --- | --- |
+| Neovim >= 0.12 | `vim.pack`, Blink v2, current Tree-sitter API | `neovim` | `Neovim.Neovim` |
+| Git | Plugin downloads, LazyGit, statusline Git information | Apple's Git, or Homebrew `git` | `Git.Git` |
+| Tree-sitter CLI >= 0.26.1 | Compile the configured language parsers | `tree-sitter-cli` | `tree-sitter.tree-sitter-cli` |
+| C compiler | Tree-sitter parsers, Rust native dependencies | Apple Command Line Tools | Existing GCC, or `BrechtSanders.WinLibs.POSIX.UCRT` |
+| Rust/Cargo, rustfmt, Clippy | Rust development and Blink's native matcher | Official rustup installer; stable toolchain | `Rustlang.Rustup`; stable GNU toolchain |
+| ripgrep (`rg`) | Telescope live grep and file search | `ripgrep` | `BurntSushi.ripgrep.MSVC` |
+| LazyGit | Terminal Git interface | `lazygit` | `JesseDuffield.lazygit` |
+| curl and tar | Download/extract parser sources | Included with macOS | Included with current Windows |
+| GNU tar, unzip, gzip | Mason archive handling | `gnu-tar`; system unzip/gzip | Git's GNU tar; PowerShell handles ZIP files |
+| 7-Zip | Mason compressed archives on Windows | Not needed | `7zip.7zip` |
+| Lua/Rust language servers | The enabled `lua_ls` and `rust_analyzer` LSPs | Mason | Mason |
+
+Minimum versions come from the locked plugins' installation code and docs:
+[Tree-sitter requirements](https://github.com/nvim-treesitter/nvim-treesitter/tree/728e031f6b11d03d1f0708b7dc4fb0f1d9c8a137#requirements),
+[Blink installation](https://github.com/saghen/blink.cmp/blob/8219b58f1c11a2fb1644d3c7116c509fa8348ec0/doc/installation.md),
+[Mason requirements](https://github.com/mason-org/mason.nvim#requirements), and
+[Telescope dependencies](https://github.com/nvim-telescope/telescope.nvim#suggested-dependencies).
+
+The remaining active plugins (Plenary, Harpoon, Oil, ToggleTerm, Lualine/Navic,
+LSPConfig/mason-lspconfig, WhichKey, Noice/NUI, autopairs, Everforest, and blink.lib) use Neovim
+and the tools above for the configured features. They do not add a separate
+build system or language runtime. Snacks is disabled in the config but is still
+present in the lockfile; `vim.pack` downloads that locked plugin too.
+
+These tools are deliberately not installed:
+
+- **Node.js/npm, Python, Go, Java, .NET:** only needed if a Mason package or a
+  project specifically requires them. Mason manages tools, but does not supply
+  every language runtime those tools depend on.
+- **fd:** optional; Telescope can list files with ripgrep.
+- **make/CMake:** not required to build this config's parsers or plugins.
+- **neovim-remote/pynvim:** LazyGit works without them.
+- **Nerd Font:** optional for decorative glyphs; choose one in your terminal if desired.
+
+## Language servers
+
+The automatic installation list lives in `lua/config/plugins/mason.lua`:
+
+```lua
+ensure_installed = { "lua_ls", "rust_analyzer" },
+automatic_enable = true,
+```
+
+Use **LSPConfig names** in this list, such as `lua_ls`, `rust_analyzer`, or `ts_ls`.
+`mason-lspconfig` translates them to Mason package names and installs missing
+servers during interactive startup. Both installers use this same list and wait
+for installation to finish in their headless sessions.
+
+All mapped LSPs installed through Mason are enabled automatically, including
+servers installed through `:Mason` that are not in `ensure_installed`. A newly
+installed server is enabled in the current session; already-installed servers
+are enabled on startup. Your server settings and LSP keymaps remain in
+`lua/config/plugins/lsp.lua`.
+
+Packages without an LSP mapping need manual configuration. Non-LSP tools such as
+debug adapters and standalone formatters need their own setup. This checkout has no DAP
+plugin/configuration; installing an adapter in Mason alone does not configure
+a debugger UI. See [mason-lspconfig's documentation](https://github.com/mason-org/mason-lspconfig.nvim#configuration).
+
+## Verify and troubleshoot
+
+```vim
+:checkhealth vim.pack nvim-treesitter mason telescope blink.cmp
+:LazyGit
+```
+
+`Space gg` opens LazyGit, `Space sf` finds files, and `Space sg` searches text.
+Parser installation failures cause the installer to exit unsuccessfully; fix
+the reported tool/compiler error and rerun. A config backup remains available
+if setup fails after the files have been copied.
+
+The configured parser list lives in `lua/config/plugins/treesitter.lua`; both
+normal startup and the installers use that same list.
+
+If LazyGit's `j` key waits about one second, restart Neovim to clear the former
+global `jk` terminal mapping. Terminal escape/navigation mappings now apply
+only to ToggleTerm. Inside ToggleTerm, `j` still waits for a possible `k` because
+`jk` exits terminal mode; LazyGit opened with `Space gg` is unaffected.

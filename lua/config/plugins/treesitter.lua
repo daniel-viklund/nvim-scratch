@@ -2,8 +2,14 @@ local treesitter = require("nvim-treesitter")
 
 treesitter.setup()
 
-treesitter.install({
+-- tree-sitter-cli otherwise defaults to MSVC on Windows.
+if vim.fn.has("win32") == 1 and not vim.env.CC and vim.fn.executable("gcc") == 1 then
+  vim.env.CC = "gcc"
+end
+
+local installation = treesitter.install({
   "lua",
+  "rust",
   "bash",
   "json",
   "javascript",
@@ -29,3 +35,5 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.wo.foldlevel = 99
   end,
 })
+
+return installation
