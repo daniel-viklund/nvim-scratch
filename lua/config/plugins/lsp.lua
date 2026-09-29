@@ -43,17 +43,6 @@ vim.lsp.config("lua_ls", {
   },
 })
 
--- Enable installed language servers
-vim.lsp.enable({
-  "lua_ls",
-
-  -- Add these later as you install them with Mason:
-  -- "ts_ls",
-  -- "pyright",
-  -- "gopls",
-  -- "rust_analyzer",
-})
-
 -- LSP keymaps
 local lsp_group = vim.api.nvim_create_augroup("lsp-attach", {
   clear = true,

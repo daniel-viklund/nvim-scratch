@@ -14,6 +14,7 @@ vim.pack.add({
 
   -- LSP
   "https://github.com/neovim/nvim-lspconfig",
+  "https://github.com/mason-org/mason-lspconfig.nvim",
 
   --Colorschemes
   "https://github.com/sainnhe/everforest.git",
@@ -50,8 +51,8 @@ vim.pack.add({
 require("config.plugins.telescope")
 require("config.plugins.lazygit")
 require("config.plugins.treesitter")
-require("config.plugins.mason")
 require("config.plugins.lsp")
+require("config.plugins.mason")
 require("config.plugins.blink")
 require("config.plugins.which-key")
 require("config.plugins.oil")
