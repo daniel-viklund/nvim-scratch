@@ -5,6 +5,7 @@ vim.pack.add({
 require("toggleterm").setup({
   direction = "horizontal",
   size = 15,
+  shade_terminals = false,
 
   start_in_insert = true,
   persist_size = true,
