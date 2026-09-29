@@ -5,7 +5,22 @@ vim.pack.add({
 
 local telescope = require("telescope")
 
-telescope.setup()
+telescope.setup({
+  defaults = {
+    layout_strategy = "vertical",
+    layout_config = {
+      vertical = {
+        mirror = false,
+        preview_cutoff = 10,
+        preview_height = function(picker, _, height)
+          -- Split the content 70/30 after reserving the prompt and borders/gaps.
+          local spacing = picker.window.border == false and 2 or 6
+          return math.max(1, math.floor((height - spacing - 1) * 0.7))
+        end,
+      },
+    },
+  },
+})
 
 local builtin = require("telescope.builtin")
 
