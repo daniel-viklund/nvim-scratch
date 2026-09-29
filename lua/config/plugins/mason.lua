@@ -1,3 +1,9 @@
+vim.pack.add({
+  "https://github.com/neovim/nvim-lspconfig",
+  "https://github.com/mason-org/mason.nvim.git",
+  "https://github.com/mason-org/mason-lspconfig.nvim",
+})
+
 require("mason").setup()
 
 local opts = {

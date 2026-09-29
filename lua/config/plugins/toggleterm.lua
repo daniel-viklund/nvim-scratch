@@ -1,3 +1,7 @@
+vim.pack.add({
+  "https://github.com/akinsho/toggleterm.nvim.git",
+})
+
 require("toggleterm").setup({
   direction = "horizontal",
   size = 15,

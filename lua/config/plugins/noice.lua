@@ -1,3 +1,8 @@
+vim.pack.add({
+  "https://github.com/MunifTanjim/nui.nvim.git",
+  "https://github.com/folke/noice.nvim.git",
+})
+
 require("noice").setup({
   lsp = {
     -- override markdown rendering so that **cmp** and other plugins use **Treesitter**

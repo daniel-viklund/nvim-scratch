@@ -1,3 +1,8 @@
+vim.pack.add({
+  "https://github.com/SmiteshP/nvim-navic",
+  "https://github.com/nvim-lualine/lualine.nvim",
+})
+
 local navic = require("nvim-navic")
 
 require("lualine").setup({

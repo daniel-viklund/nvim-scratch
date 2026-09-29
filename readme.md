@@ -4,6 +4,30 @@ Requires Neovim **0.12 or newer**. Plugins are managed by `vim.pack` and pinned
 in `nvim-pack-lock.json`. Language servers, debug adapters, formatters, and
 linters are managed by Mason.
 
+## Plugins
+
+Each plugin has one file in `lua/config/plugins/` containing its install
+declaration and configuration. `init.lua` automatically loads every other
+`.lua` file in that directory, alphabetically.
+
+To add a plugin, create a file such as `lua/config/plugins/comment.lua`:
+
+```lua
+vim.pack.add({ "https://github.com/numToStr/Comment.nvim" })
+
+require("Comment").setup()
+```
+
+Restart Neovim to install and load it. No edits to `plugins/init.lua` are needed.
+List dependencies before the plugin in the same `vim.pack.add` call; shared
+dependencies can appear in multiple files because `vim.pack` loads them once.
+Use a spec table for a custom name or branch, as shown in `colorscheme.lua` and
+`harpoon.lua`.
+
+To disable a plugin, rename its file from `.lua` to `.lua.disabled` and restart.
+Snacks is already disabled this way. To enable it, rename `snacks.lua.disabled`
+back to `snacks.lua`. Disabled plugins stay installed and in the lockfile.
+
 ## Install
 
 Download or clone this entire config, then run the installer from its directory.

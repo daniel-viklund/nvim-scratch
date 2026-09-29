@@ -1,3 +1,8 @@
+vim.pack.add({
+  "https://github.com/neovim/nvim-lspconfig",
+  "https://github.com/SmiteshP/nvim-navic",
+})
+
 -- Diagnostics
 vim.diagnostic.config({
   severity_sort = true,
