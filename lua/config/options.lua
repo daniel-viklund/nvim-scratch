@@ -8,3 +8,4 @@ vim.opt.fillchars = {
 vim.opt.signcolumn = "yes"
 vim.opt.hlsearch = true
 vim.opt.incsearch = true -- keep search matches highlighted afterward
+vim.opt.guicursor = "n-v-i-c:block"
