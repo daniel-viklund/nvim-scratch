@@ -4,6 +4,14 @@ Requires Neovim **0.12 or newer**. Plugins are managed by `vim.pack` and pinned
 in `nvim-pack-lock.json`. Language servers, debug adapters, formatters, and
 linters are managed by Mason.
 
+## Home screen
+
+Starting without a file shows centered Neovim artwork. Press `-` to open Oil;
+pressing `q` in Oil returns to the artwork if no file buffers are open.
+Deleting the last file buffer with `:bd` also brings the artwork back.
+Hidden file buffers and unsaved drafts count as open buffers. Press `q` on
+the home screen to quit. Customize the artwork in `lua/config/start.lua`.
+
 ## Plugins
 
 Each plugin has one file in `lua/config/plugins/` containing its install
