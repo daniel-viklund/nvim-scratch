@@ -1,109 +1,110 @@
 vim.pack.add({
-  "https://github.com/neovim/nvim-lspconfig",
-  "https://github.com/SmiteshP/nvim-navic",
+    "https://github.com/neovim/nvim-lspconfig",
+    "https://github.com/SmiteshP/nvim-navic",
 })
 
 -- Diagnostics
 vim.diagnostic.config({
-  severity_sort = true,
+    severity_sort = true,
 
-  float = {
-    border = "rounded",
-    source = true,
-  },
+    float = {
+        border = "rounded",
+        source = true,
+    },
 
-  underline = true,
-  signs = true,
+    underline = true,
+    signs = true,
 
-  virtual_text = {
-    spacing = 2,
-    source = "if_many",
-  },
+    virtual_text = {
+        spacing = 2,
+        source = "if_many",
+    },
 })
 
 -- Server-specific configuration
 vim.lsp.config("lua_ls", {
-  settings = {
-    Lua = {
-      runtime = {
-        version = "LuaJIT",
-      },
+    settings = {
+        Lua = {
+            runtime = {
+                version = "LuaJIT",
+            },
 
-      diagnostics = {
-        globals = {
-          "vim",
+            diagnostics = {
+                globals = {
+                    "vim",
+                },
+            },
+
+            workspace = {
+                library = {
+                    vim.env.VIMRUNTIME,
+                },
+            },
+
+            telemetry = {
+                enable = false,
+            },
         },
-      },
-
-      workspace = {
-        library = {
-          vim.env.VIMRUNTIME,
-        },
-      },
-
-      telemetry = {
-        enable = false,
-      },
     },
-  },
 })
 
 -- LSP keymaps
 local lsp_group = vim.api.nvim_create_augroup("lsp-attach", {
-  clear = true,
+    clear = true,
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {
-  group = lsp_group,
+    group = lsp_group,
 
-  callback = function(event)
-    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    callback = function(event)
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
 
-    local map = function(keys, func, desc)
-      vim.keymap.set("n", keys, func, {
-        buffer = event.buf,
-        desc = "LSP: " .. desc,
-      })
-    end
+        local map = function(keys, func, desc)
+            vim.keymap.set("n", keys, func, {
+                buffer = event.buf,
+                desc = "LSP: " .. desc,
+            })
+        end
 
-    -- Navigation
-    map("gd", vim.lsp.buf.definition, "Goto definition")
-    map("gD", vim.lsp.buf.declaration, "Goto declaration")
-    map("gi", vim.lsp.buf.implementation, "Goto implementation")
-    map("gr", vim.lsp.buf.references, "Goto references")
+        -- Navigation
+        map("gd", vim.lsp.buf.definition, "Goto definition")
+        map("gD", vim.lsp.buf.declaration, "Goto declaration")
+        map("gi", vim.lsp.buf.implementation, "Goto implementation")
+        map("gr", vim.lsp.buf.references, "Goto references")
 
-    -- Documentation
-    map("K", vim.lsp.buf.hover, "Hover documentation")
+        -- Documentation
+        map("K", vim.lsp.buf.hover, "Hover documentation")
 
-    -- Refactoring / actions
-    map("<leader>lr", vim.lsp.buf.rename, "Rename")
-    map("<leader>lc", vim.lsp.buf.code_action, "Code action")
+        -- Refactoring / actions
+        map("<leader>lr", vim.lsp.buf.rename, "Rename")
+        map("<leader>lc", vim.lsp.buf.code_action, "Code action")
+        map("<leader>lf", vim.lsp.buf.format, "Format")
 
-    -- Symbols
-    map("<leader>ld", vim.lsp.buf.document_symbol, "Document symbols")
-    map("<leader>lw", vim.lsp.buf.workspace_symbol, "Workspace symbols")
+        -- Symbols
+        map("<leader>ld", vim.lsp.buf.document_symbol, "Document symbols")
+        map("<leader>lw", vim.lsp.buf.workspace_symbol, "Workspace symbols")
 
-    -- Diagnostics
-    map("[d", function()
-      vim.diagnostic.jump({
-        count = -1,
-        float = true,
-      })
-    end, "Previous diagnostic")
+        -- Diagnostics
+        map("[d", function()
+            vim.diagnostic.jump({
+                count = -1,
+                float = true,
+            })
+        end, "Previous diagnostic")
 
-    map("]d", function()
-      vim.diagnostic.jump({
-        count = 1,
-        float = true,
-      })
-    end, "Next diagnostic")
+        map("]d", function()
+            vim.diagnostic.jump({
+                count = 1,
+                float = true,
+            })
+        end, "Next diagnostic")
 
-    -- Navic breadcrumbs
-    if
-      client
-      and client:supports_method("textDocument/documentSymbol")
-    then
-      require("nvim-navic").attach(client, event.buf)
-    end
-  end,
+        -- Navic breadcrumbs
+        if
+            client
+            and client:supports_method("textDocument/documentSymbol")
+        then
+            require("nvim-navic").attach(client, event.buf)
+        end
+    end,
 })

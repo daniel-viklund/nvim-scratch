@@ -1,4 +1,9 @@
 vim.opt.clipboard = "unnamedplus"
+-- Use four spaces for Tab, automatic indentation, and existing tab characters.
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = -1 -- Follow shiftwidth when inserting/deleting indentation.
 vim.opt.number = true
 vim.opt.termguicolors = true
 vim.opt.winborder = "rounded"
