@@ -7,8 +7,27 @@ vim.pack.add({
 require("config.plugins.notify")
 
 require("noice").setup({
+  commands = {
+    history = {
+      filter = {
+        any = {
+          { event = "notify" },
+          { error = true },
+          { warning = true },
+          -- Neovim gives print/echo messages their own kinds.
+          { event = "msg_show", kind = { "", "lua_print", "echo", "echomsg" } },
+          { event = "lsp", kind = "message" },
+        },
+      },
+    },
+  },
   views = {
     notify = { backend = "notify" },
+    split = {
+      win_options = {
+        winhighlight = { Normal = "Normal", NormalNC = "Normal" },
+      },
+    },
   },
   messages = {
     view = "notify",

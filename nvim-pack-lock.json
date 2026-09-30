@@ -12,6 +12,10 @@
       "rev": "85a86eb62409e3ec88713bff3d1b9d7374e112e4",
       "src": "https://github.com/sainnhe/everforest.git"
     },
+    "gitsigns.nvim": {
+      "rev": "070a5d7b985546cc57e1fc61e5bc507fecac6045",
+      "src": "https://github.com/lewis6991/gitsigns.nvim"
+    },
     "gruvbox": {
       "rev": "ef8864bb42bf244f0295d1c5a403b27e3d139695",
       "src": "https://github.com/morhetz/gruvbox.git"

@@ -26,6 +26,7 @@ require("lualine").setup({
 
     disabled_filetypes = {
       winbar = {
+        "noice",
         "toggleterm",
         "startscreen",
       },
