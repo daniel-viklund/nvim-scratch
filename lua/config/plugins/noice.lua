@@ -3,7 +3,22 @@ vim.pack.add({
   "https://github.com/folke/noice.nvim.git",
 })
 
+-- Configure the backend before Noice takes over vim.notify.
+require("config.plugins.notify")
+
 require("noice").setup({
+  views = {
+    notify = { backend = "notify" },
+  },
+  messages = {
+    view = "notify",
+    view_error = "notify",
+    view_warn = "notify",
+  },
+  notify = {
+    enabled = true,
+    view = "notify",
+  },
   lsp = {
     -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
     override = {
