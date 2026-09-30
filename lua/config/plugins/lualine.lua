@@ -5,6 +5,20 @@ vim.pack.add({
 
 local navic = require("nvim-navic")
 
+local function display_filename(name)
+  if vim.bo.filetype == "oil" then
+    local directory = require("oil").get_current_dir()
+    if directory then
+      local path = vim.fn.fnamemodify(directory, ":~")
+      if path ~= "/" and not path:match("^%a:[/\\]$") then
+        path = path:gsub("[/\\]+$", "")
+      end
+      return "Directory · " .. path
+    end
+  end
+  return name
+end
+
 require("lualine").setup({
   options = {
     theme = "auto",
@@ -13,6 +27,7 @@ require("lualine").setup({
     disabled_filetypes = {
       winbar = {
         "toggleterm",
+        "startscreen",
       },
     },
   },
@@ -27,6 +42,7 @@ require("lualine").setup({
       {
         "filename",
         path = 1,
+        fmt = display_filename,
       },
 
       {
@@ -50,6 +66,7 @@ require("lualine").setup({
       {
         "filename",
         path = 1,
+        fmt = display_filename,
       },
     },
   },
