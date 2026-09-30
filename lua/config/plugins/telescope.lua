@@ -5,6 +5,24 @@ vim.pack.add({
 
 local telescope = require("telescope")
 
+local function match_editor_background()
+  local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  for _, pane in ipairs({ "", "Prompt", "Results", "Preview" }) do
+    for _, part in ipairs({ "Normal", "Border", "Title" }) do
+      local name = "Telescope" .. pane .. part
+      local highlight = vim.api.nvim_get_hl(0, { name = name, link = false })
+      highlight.bg = normal.bg or "NONE"
+      vim.api.nvim_set_hl(0, name, highlight)
+    end
+  end
+end
+
+match_editor_background()
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("TelescopeEditorBackground", { clear = true }),
+  callback = match_editor_background,
+})
+
 telescope.setup({
   defaults = {
     layout_strategy = "vertical",
