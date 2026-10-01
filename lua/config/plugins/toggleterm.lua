@@ -20,7 +20,7 @@ require("toggleterm").setup({
 
 -- Terminal mode mappings
 vim.api.nvim_create_autocmd("TermOpen", {
-  pattern = "term://*toggleterm#*",
+  pattern = { "term://*#toggleterm#*", "term://*::toggleterm::*" },
   callback = function()
     local opts = { buffer = 0 }
 
@@ -46,12 +46,16 @@ vim.keymap.set("n", "<leader>t3", "<cmd>3ToggleTerm<CR>", {
   desc = "Terminal 3",
 })
 
-vim.keymap.set("n", "<leader>t4", "<cmd>4ToggleTerm<CR>", {
-  desc = "Terminal 4",
-})
+-- Terminal 4 is reserved for the project runner.
+require("config.runner").setup()
 
 -- Create a fresh terminal
-vim.keymap.set("n", "<leader>tn", "<cmd>TermNew<CR>", {
+vim.keymap.set("n", "<leader>tn", function()
+  local terminals = require("toggleterm.terminal")
+  local id = 1
+  while id == 4 or terminals.get(id, true) do id = id + 1 end
+  terminals.Terminal:new({ count = id }):toggle()
+end, {
   desc = "New terminal",
 })
 

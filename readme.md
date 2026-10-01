@@ -55,6 +55,48 @@ the extra cursors and search highlighting.
 | `Space mn` / `Space mN` | Add the next / previous matching word or selection |
 | `Space ma` | Add cursors at all matching words or selections |
 
+## Build and run
+
+Use `Space tc` to set any shell **build command**, **run command**, and
+**working directory** for the current project. These can invoke any tool or
+script; no language-specific runner or extra plugin is required. The first
+build/run also prompts if its command is missing. Leave build blank for projects
+that only need a run command, or run blank for build-only projects.
+
+| Mapping (Normal mode) | Action |
+| --- | --- |
+| `Space tb` | Build |
+| `Space tr` | Run, or stop and restart the current command |
+| `Space tR` | Stop, build, then run only if the build succeeds; skip an empty build command |
+| `Space tx` | Stop, including any pending restart or build/run sequence |
+| `Space tc` | Configure this project's commands |
+| `Space t4` | Show/hide the latest build/run output |
+
+Terminal **4** is reserved for this runner. Terminals 1–3 remain ordinary shells;
+`Space tn` skips 4 when creating another shell. Only one runner command is active
+at a time. A new build/run replaces it after it exits. Output stays visible when
+a command finishes or fails, until the next command starts. Launching shows the
+output and returns focus to your source window. Navigate to the terminal with
+your window mappings and press `i` for interactive input; `jk` returns to Normal
+mode. Opening hidden output with `Space t4` also focuses the terminal.
+
+Commands run through Neovim's `shell` using files on disk, so save your changes
+first. Build and run are separate processes: put shared environment setup in
+both commands or in a script. Commands should stay in the foreground so the
+runner can stop them. It also stops its active command when Neovim exits.
+
+Projects are identified by the current file's nearest Git root (including Git
+worktrees), falling back to Neovim's current directory outside Git. In the output
+terminal, shortcuts use the project that produced that output. Working
+directories can be absolute or relative to the project root, such as `src/api`.
+Settings are stored locally in `stdpath("data")/project-runner/`, separately for
+each project, and survive Neovim restarts. They do not add files to your repos.
+
+The implementation lives in `lua/config/runner.lua`, loaded by the ToggleTerm
+configuration. On macOS/Linux, with ToggleTerm installed and Python 3 available,
+run the process integration checks using
+`nvim --headless -u NONE -l scripts/test-runner.lua`.
+
 ## Install
 
 Download or clone this entire config, then run the installer from its directory.
