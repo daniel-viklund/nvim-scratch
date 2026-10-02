@@ -4,6 +4,35 @@ vim.pack.add({
 
 local notify = require("notify")
 
+-- Compact layout without the built-in renderer's vertical separator.
+local function render_compact(buf, notification, highlights)
+  local namespace = require("notify.render.base").namespace()
+  local icon = notification.icon
+  local title = notification.title[1]
+  if type(title) == "string" and notification.duplicates then
+    title = string.format("%s x%d", title, #notification.duplicates)
+  end
+  local icon_prefix = icon ~= "" and icon .. " " or ""
+  local prefix = icon_prefix .. (type(title) == "string" and title ~= "" and title .. ": " or "")
+  local lines = { prefix .. notification.message[1], unpack(notification.message, 2) }
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_buf_set_extmark(buf, namespace, 0, 0, {
+    hl_group = highlights.icon,
+    end_col = #icon,
+    priority = 50,
+  })
+  vim.api.nvim_buf_set_extmark(buf, namespace, 0, #icon_prefix, {
+    hl_group = highlights.title,
+    end_col = #prefix,
+    priority = 50,
+  })
+  vim.api.nvim_buf_set_extmark(buf, namespace, 0, #prefix, {
+    hl_group = highlights.body,
+    end_line = #lines,
+    priority = 50,
+  })
+end
+
 local function match_editor_background()
   local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
   for _, level in ipairs({ "ERROR", "WARN", "INFO", "DEBUG", "TRACE" }) do
@@ -26,7 +55,15 @@ notify.setup({
   background_colour = "Normal",
   timeout = 2500,
   stages = "static",
-  render = "compact",
+  render = render_compact,
+  -- Use text symbols instead of the default Nerd Font icons.
+  icons = {
+    ERROR = "✖",
+    WARN = "▲",
+    INFO = "ℹ",
+    DEBUG = "◆",
+    TRACE = "·",
+  },
   minimum_width = 15,
   max_width = function()
     return math.min(42, math.max(15, math.floor(vim.o.columns * 0.3)))
