@@ -203,11 +203,11 @@ end
 
 function M.setup()
   local mappings = {
-    { "tb", function() M.execute("build") end, "Build project" },
-    { "tr", function() M.execute("run") end, "Run/restart project" },
-    { "tR", function() M.execute("build_run") end, "Build and run project" },
-    { "tx", M.stop, "Stop project" },
-    { "tc", M.configure, "Configure project commands" },
+    { "pb", function() M.execute("build") end, "Build project" },
+    { "pr", function() M.execute("run") end, "Run/restart project" },
+    { "pR", function() M.execute("build_run") end, "Build and run project" },
+    { "px", M.stop, "Stop project" },
+    { "pc", M.configure, "Configure project commands" },
     { "t4", M.toggle, "Terminal 4: project output" },
   }
   for _, mapping in ipairs(mappings) do
