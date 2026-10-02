@@ -49,6 +49,12 @@ vim.lsp.config("lua_ls", {
 })
 
 -- LSP keymaps
+-- Remove Neovim's global defaults so they do not extend our `gr` mapping.
+for _, keys in ipairs({ "gra", "gri", "grn", "grr", "grt", "grx" }) do
+    pcall(vim.keymap.del, "n", keys)
+end
+pcall(vim.keymap.del, "x", "gra")
+
 local lsp_group = vim.api.nvim_create_augroup("lsp-attach", {
     clear = true,
 })
