@@ -1,3 +1,6 @@
+-- Capture the launch directory before plugins can change Neovim's cwd.
+vim.g.project_runner_launch_dir = vim.fn.getcwd()
+
 -- Archive tools installed on Windows are exposed only to this Neovim process.
 if vim.fn.has("win32") == 1 then
   local path_file = vim.fs.joinpath(vim.fn.stdpath("config"), "windows-path.txt")

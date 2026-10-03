@@ -19,6 +19,8 @@ end
 local function main()
   fn.mkdir(temporary, "p")
   temporary = assert(vim.uv.fs_realpath(temporary))
+  vim.g.project_runner_launch_dir = temporary .. "/project"
+  fn.mkdir(vim.g.project_runner_launch_dir .. "/app", "p")
   vim.opt.runtimepath:prepend(source)
   vim.cmd.packadd("toggleterm.nvim")
   fn.stdpath = function(kind)
@@ -36,7 +38,7 @@ local function main()
 
   local project = temporary .. "/project"
   local other = temporary .. "/other"
-  fn.mkdir(project .. "/.git", "p")
+  fn.mkdir(temporary .. "/.git", "p") -- An ancestor Git root must not override the launch directory.
   fn.mkdir(project .. "/app", "p")
   fn.mkdir(other .. "/.git", "p")
   fn.writefile({ "source" }, project .. "/app/main.txt")
@@ -111,8 +113,9 @@ while True:
     vim.cmd.edit(fn.fnameescape(path))
   end
 
-  -- Detect the file's Git root even when Neovim's cwd is elsewhere.
-  edit(project .. "/app/main.txt")
+  -- Use the launch directory despite another buffer's Git root and a changed cwd.
+  vim.cmd.cd(fn.fnameescape(other))
+  edit(other .. "/main.txt")
   local source_window = api.nvim_get_current_win()
   configure(command("build", "0 0"), command("run"))
   assert(#fn.glob(temporary .. "/data/project-runner/*.json", false, true) == 1)
@@ -176,6 +179,11 @@ while True:
   runner.execute("build_run") -- An empty build command is optional.
   wait_for("run with no build", function() return #fn.readfile(project .. "/runs") == 2 end)
   settled()
+  -- Simulate launching a new Neovim session in a different folder.
+  vim.g.project_runner_launch_dir = other
+  package.loaded["config.runner"] = nil
+  runner = require("config.runner")
+  runner.setup()
   edit(other .. "/main.txt")
   configure("", command("run"), ".")
   runner.execute("run")

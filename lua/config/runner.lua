@@ -4,17 +4,15 @@ local api = vim.api
 local current, pending
 local quitting = false
 local pump
+local launch_dir = vim.g.project_runner_launch_dir or vim.fn.getcwd()
+local launch_root = vim.fs.normalize(vim.uv.fs_realpath(launch_dir) or launch_dir)
 
 local function notify(message, level)
   vim.notify(message, level or vim.log.levels.INFO, { title = "Project runner" })
 end
 
 local function project_root()
-  if current and api.nvim_get_current_buf() == current.term.bufnr then
-    return current.root
-  end
-  local root = vim.fs.root(0, ".git") or vim.fn.getcwd()
-  return vim.fs.normalize(vim.uv.fs_realpath(root) or root)
+  return launch_root
 end
 
 local function config_path(root)
@@ -172,7 +170,7 @@ function M.execute(action)
     local phase = action == "build" and "build" or "run"
     if action == "build_run" and settings.build ~= "" then phase = "build" end
     if settings[phase] == "" or (action == "build_run" and settings.run == "") then
-      notify("Command is empty. Configure it with <leader>tc.", vim.log.levels.WARN)
+      notify("Command is empty. Configure it with <leader>pc.", vim.log.levels.WARN)
       return
     end
     local cwd = working_directory(root, settings.cwd)
@@ -197,7 +195,7 @@ function M.toggle()
     -- Keep the object even after exit: ToggleTerm removes finished jobs from its registry.
     current.term:toggle()
   else
-    notify("No runner output yet. Use <leader>tr to run or <leader>tb to build.")
+    notify("No runner output yet. Use <leader>pr to run or <leader>pb to build.")
   end
 end
 
