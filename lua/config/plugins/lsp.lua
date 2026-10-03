@@ -76,7 +76,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
         map("gd", vim.lsp.buf.definition, "Goto definition")
         map("gD", vim.lsp.buf.declaration, "Goto declaration")
         map("gi", vim.lsp.buf.implementation, "Goto implementation")
-        map("gr", vim.lsp.buf.references, "Goto references")
+        map("gr", function()
+            require("telescope.builtin").lsp_references()
+        end, "Goto references")
 
         -- Documentation
         map("K", vim.lsp.buf.hover, "Hover documentation")
