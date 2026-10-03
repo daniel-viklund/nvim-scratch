@@ -12,17 +12,45 @@ if vim.fn.has("win32") == 1 and not vim.env.CC and vim.fn.executable("gcc") == 1
 end
 
 local installation = treesitter.install({
+  -- Lua / Neovim
   "lua",
-  "rust",
-  "bash",
-  "json",
+
+  -- TypeScript / JavaScript / React (also used by ESLint)
   "javascript",
   "typescript",
   "tsx",
+
+  -- Web (Tailwind uses the parsers for its host languages)
   "html",
   "css",
+  "json",
+
+  -- Config / markup
+  "yaml",
   "markdown",
   "markdown_inline",
+
+  -- Shell
+  "bash",
+
+  -- Rust
+  "rust",
+
+  -- Go
+  "go",
+  "gomod",
+  "gosum",
+  "gowork",
+
+  -- Python
+  "python",
+
+  -- C / C++
+  "c",
+  "cpp",
+
+  -- Docker
+  "dockerfile",
 })
 
 vim.api.nvim_create_autocmd("FileType", {
