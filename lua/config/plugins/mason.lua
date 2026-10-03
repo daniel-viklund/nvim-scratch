@@ -7,9 +7,46 @@ vim.pack.add({
 require("mason").setup()
 
 local opts = {
-  -- Use LSPConfig names here; mason-lspconfig maps them to Mason packages.
-  ensure_installed = { "lua_ls", "rust_analyzer", "jsonls" },
-  -- Also enable mapped servers installed through the Mason UI.
+  -- Use LSPConfig names here.
+  -- mason-lspconfig maps these to their corresponding Mason packages.
+  ensure_installed = {
+    -- Lua / Neovim
+    "lua_ls",
+
+    -- TypeScript / JavaScript / React
+    "vtsls",
+    "eslint",
+
+    -- Web
+    "html",
+    "cssls",
+    "jsonls",
+    "tailwindcss",
+
+    -- Config / markup
+    "yamlls",
+    "marksman",
+
+    -- Shell
+    "bashls",
+
+    -- Rust
+    "rust_analyzer",
+
+    -- Go
+    "gopls",
+
+    -- Python
+    "basedpyright",
+
+    -- C / C++
+    "clangd",
+
+    -- Docker
+    "dockerls",
+  },
+
+  -- Automatically enable servers installed through Mason.
   automatic_enable = true,
 }
 
