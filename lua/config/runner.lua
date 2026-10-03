@@ -190,6 +190,10 @@ function M.execute(action)
   if needs_config then configure(root, start) else start(config) end
 end
 
+function M.terminal()
+  return current and current.term
+end
+
 function M.toggle()
   if current and current.term.bufnr and api.nvim_buf_is_valid(current.term.bufnr) then
     -- Keep the object even after exit: ToggleTerm removes finished jobs from its registry.

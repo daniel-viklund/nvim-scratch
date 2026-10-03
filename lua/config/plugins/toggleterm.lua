@@ -49,6 +49,46 @@ vim.keymap.set("n", "<leader>t3", "<cmd>3ToggleTerm<CR>", {
 -- Terminal 4 is reserved for the project runner.
 require("config.runner").setup()
 
+-- Remember the visible set in each tab, including finished project output.
+local hidden_terminals = {}
+vim.keymap.set("n", "<leader>tt", function()
+  local api = vim.api
+  local tab = api.nvim_get_current_tabpage()
+  local candidates = require("toggleterm.terminal").get_all(true)
+  local project = require("config.runner").terminal()
+  if project and not vim.tbl_contains(candidates, project) then
+    candidates[#candidates + 1] = project
+  end
+  local visible = {}
+  for _, term in ipairs(candidates) do
+    if term.window and api.nvim_win_is_valid(term.window)
+      and api.nvim_win_get_tabpage(term.window) == tab
+      and api.nvim_win_get_buf(term.window) == term.bufnr then
+      visible[#visible + 1] = {
+        term = term,
+        size = term.direction == "vertical" and api.nvim_win_get_width(term.window)
+          or api.nvim_win_get_height(term.window),
+      }
+    end
+  end
+  if #visible > 0 then
+    hidden_terminals[tab] = visible
+    for _, item in ipairs(visible) do item.term:close() end
+  else
+    local window = api.nvim_get_current_win()
+    for _, item in ipairs(hidden_terminals[tab] or {}) do
+      local term = item.term
+      -- Exited shells or replaced project jobs must not be launched again.
+      if term.bufnr and api.nvim_buf_is_valid(term.bufnr) then
+        term:open(item.size)
+      end
+    end
+    hidden_terminals[tab] = nil
+    if api.nvim_win_is_valid(window) then api.nvim_set_current_win(window) end
+    vim.cmd.stopinsert()
+  end
+end, { desc = "Toggle visible terminals" })
+
 -- Create a fresh terminal
 vim.keymap.set("n", "<leader>tn", function()
   local terminals = require("toggleterm.terminal")

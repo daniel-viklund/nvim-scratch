@@ -133,6 +133,29 @@ while True:
   api.nvim_set_current_win(source_window)
   vim.cmd.stopinsert()
 
+  -- Hide/restore shells together with finished project output, without rerunning either.
+  local terminals = require("toggleterm.terminal")
+  local shell = terminals.Terminal:new({ count = 1, cmd = "cat" })
+  local hidden = terminals.Terminal:new({ count = 2, cmd = "cat" })
+  hidden:open()
+  hidden:close()
+  shell:open()
+  local shell_job = shell.job_id
+  local project_term = runner.terminal()
+  local toggle_all = fn.maparg("<leader>tt", "n", false, true).callback
+  toggle_all()
+  assert(not shell:is_open() and not project_term:is_open(), "Did not hide both terminals")
+  assert(vim.uv.kill(fn.jobpid(shell_job), 0) == 0, "Hiding stopped the shell")
+  toggle_all()
+  assert(shell:is_open() and project_term:is_open(), "Did not restore both terminals")
+  assert(not hidden:is_open(), "Restored a terminal that was already hidden")
+  assert(shell.job_id == shell_job, "Restoring restarted the shell")
+  assert(read(project .. "/runs") == project .. "/app", "Restoring reran the project")
+  shell:shutdown()
+  hidden:shutdown()
+  api.nvim_set_current_win(source_window)
+  vim.cmd.stopinsert()
+
   -- Failed builds retain their output and never launch the run command.
   configure(command("build", "7 0"), command("run"))
   runner.execute("build_run")
