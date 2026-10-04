@@ -8,7 +8,7 @@ require("toggleterm").setup({
   shade_terminals = false,
 
   start_in_insert = true,
-  persist_size = true,
+  persist_size = false, -- Reopen at 15 lines instead of remembering a compressed split.
   persist_mode = true,
 
   close_on_exit = true,
@@ -64,23 +64,18 @@ vim.keymap.set("n", "<leader>tt", function()
     if term.window and api.nvim_win_is_valid(term.window)
       and api.nvim_win_get_tabpage(term.window) == tab
       and api.nvim_win_get_buf(term.window) == term.bufnr then
-      visible[#visible + 1] = {
-        term = term,
-        size = term.direction == "vertical" and api.nvim_win_get_width(term.window)
-          or api.nvim_win_get_height(term.window),
-      }
+      visible[#visible + 1] = term
     end
   end
   if #visible > 0 then
     hidden_terminals[tab] = visible
-    for _, item in ipairs(visible) do item.term:close() end
+    for _, term in ipairs(visible) do term:close() end
   else
     local window = api.nvim_get_current_win()
-    for _, item in ipairs(hidden_terminals[tab] or {}) do
-      local term = item.term
+    for _, term in ipairs(hidden_terminals[tab] or {}) do
       -- Exited shells or replaced project jobs must not be launched again.
       if term.bufnr and api.nvim_buf_is_valid(term.bufnr) then
-        term:open(item.size)
+        term:open()
       end
     end
     hidden_terminals[tab] = nil

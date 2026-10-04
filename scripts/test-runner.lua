@@ -17,6 +17,7 @@ local function read(path)
 end
 
 local function main()
+  vim.o.lines = 50
   fn.mkdir(temporary, "p")
   temporary = assert(vim.uv.fs_realpath(temporary))
   vim.g.project_runner_launch_dir = temporary .. "/project"
@@ -143,11 +144,14 @@ while True:
   local shell_job = shell.job_id
   local project_term = runner.terminal()
   local toggle_all = fn.maparg("<leader>tt", "n", false, true).callback
+  api.nvim_win_set_height(shell.window, 2)
   toggle_all()
   assert(not shell:is_open() and not project_term:is_open(), "Did not hide both terminals")
   assert(vim.uv.kill(fn.jobpid(shell_job), 0) == 0, "Hiding stopped the shell")
   toggle_all()
   assert(shell:is_open() and project_term:is_open(), "Did not restore both terminals")
+  assert(api.nvim_win_get_height(shell.window) == 15, "Shell retained its compressed height")
+  assert(api.nvim_win_get_height(project_term.window) == 15, "Project retained its compressed height")
   assert(not hidden:is_open(), "Restored a terminal that was already hidden")
   assert(shell.job_id == shell_job, "Restoring restarted the shell")
   assert(read(project .. "/runs") == project .. "/app", "Restoring reran the project")

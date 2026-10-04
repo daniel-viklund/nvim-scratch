@@ -1,4 +1,14 @@
 vim.opt.clipboard = "unnamedplus"
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermLeave", "TermClose" }, {
+  group = vim.api.nvim_create_augroup("ReloadExternalChanges", { clear = true }),
+  callback = vim.schedule_wrap(function()
+    if vim.fn.getcmdwintype() == "" and vim.api.nvim_get_mode().mode ~= "c" then
+      vim.cmd.checktime()
+    end
+  end),
+})
+
 -- Use four spaces for Tab, automatic indentation, and existing tab characters.
 vim.opt.expandtab = true
 vim.opt.tabstop = 4
