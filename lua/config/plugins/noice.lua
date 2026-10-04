@@ -39,6 +39,10 @@ require("noice").setup({
     view = "notify",
   },
   lsp = {
+    hover = {
+      -- One server can return nothing while another provides documentation.
+      silent = true,
+    },
     -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
     override = {
       ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
