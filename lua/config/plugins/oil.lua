@@ -5,6 +5,16 @@ vim.pack.add({
 require("oil").setup({
   keymaps = {
     ["q"] = "actions.close",
+    ["<C-o>"] = {
+      function()
+        local dir = require("oil").get_current_dir()
+        if dir then
+          vim.ui.open(dir)
+        end
+      end,
+      mode = "n",
+      desc = "Open current directory in system file manager",
+    },
   },
 })
 
