@@ -79,23 +79,30 @@ else:
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGHUP, stop)
     record("starts", os.getpid())
+    print(directory.name + " STDOUT", flush=True)
+    print(directory.name + " STDERR", file=sys.stderr, flush=True)
 while True:
     time.sleep(0.05)
 ]], "\n"), worker)
 
-  local function command(mode, arguments)
-    return table.concat({ fn.shellescape(python), fn.shellescape(worker), fn.shellescape(project), mode,
+  local function command(mode, arguments, directory)
+    return table.concat({ fn.shellescape(python), fn.shellescape(worker), fn.shellescape(directory or project), mode,
       arguments or "" }, " ")
   end
   local function configure(build, run, cwd)
-    local values = { build, run, cwd or "app" }
+    local values = { build }
+    for _, cmd in ipairs(type(run) == "table" and run or (run == "" and {} or { run })) do
+      values[#values + 1] = cmd
+    end
+    values[#values + 1] = ""
+    values[#values + 1] = cwd or "app"
     local index = 0
     vim.ui.input = function(_, callback)
       index = index + 1
       callback(values[index])
     end
     runner.configure()
-    assert(index == 3, "Expected three configuration prompts")
+    assert(index == #values, "Unexpected configuration prompts")
   end
   local function output()
     local result = {}
@@ -107,7 +114,11 @@ while True:
     return table.concat(result, "\n")
   end
   local function settled()
-    wait_for("runner exit", function() return require("toggleterm.terminal").get(4, true) == nil end)
+    wait_for("runner exit", function()
+      return vim.iter(runner.terminals()):all(function(term)
+        return require("toggleterm.terminal").get(term.id, true) == nil
+      end)
+    end)
     vim.wait(100, function() return false end, 10)
   end
   local function edit(path)
@@ -196,6 +207,95 @@ while True:
   runner.stop() -- Cancel a queued restart before the old process finishes.
   settled()
   assert(#fn.readfile(project .. "/starts") == 2, "Stop did not cancel the pending restart")
+
+  -- Multiple foreground commands have independent output and share stop/restart.
+  local client, server = project .. "/client", project .. "/server"
+  fn.mkdir(client, "p")
+  fn.mkdir(server, "p")
+  local commands = { command("serve", nil, server), command("serve", nil, client) }
+  configure(command("build", "7 0"), commands)
+  runner.execute("build_run")
+  settled()
+  assert(read(server .. "/starts") == "" and read(client .. "/starts") == "", "Ran after failed build")
+  configure(command("build", "0 0"), commands)
+  package.loaded["config.runner"] = nil
+  runner = require("config.runner")
+  runner.setup()
+  vim.ui.input = function() error("Multiple commands did not persist") end
+  local occupied = terminals.Terminal:new({ count = 5, cmd = "cat" })
+  occupied:open()
+  occupied:close()
+  api.nvim_set_current_win(source_window)
+  vim.cmd.stopinsert()
+  runner.execute("build_run")
+  wait_for("both processes and children", function()
+    return read(server .. "/child-ready") ~= "" and read(client .. "/child-ready") ~= ""
+  end)
+  local outputs = runner.terminals()
+  assert(#outputs == 2 and outputs[1].id == 4 and outputs[2].id == 6, "Overwrote an occupied terminal")
+  wait_for("independent stdout/stderr", function()
+    for i, name in ipairs({ "server", "client" }) do
+      local lines = table.concat(api.nvim_buf_get_lines(outputs[i].bufnr, 0, -1, false), "\n")
+      if not lines:find(name .. " STDOUT", 1, true) or not lines:find(name .. " STDERR", 1, true) then
+        return false
+      end
+      local other_name = i == 1 and "client" or "server"
+      assert(not lines:find(other_name .. " STDOUT", 1, true), "Output was mixed")
+    end
+    return true
+  end)
+  assert(api.nvim_get_current_win() == source_window, "Multiple launches stole focus")
+  local old_pids = {}
+  for _, directory in ipairs({ server, client }) do
+    old_pids[#old_pids + 1] = tonumber(read(directory .. "/starts"))
+    old_pids[#old_pids + 1] = tonumber(read(directory .. "/child-ready"))
+  end
+  runner.execute("run")
+  runner.execute("run")
+  runner.execute("run")
+  wait_for("both replacement processes", function()
+    return #fn.readfile(server .. "/starts") == 2 and #fn.readfile(client .. "/starts") == 2
+      and tonumber(read(server .. "/child-ready")) ~= old_pids[2]
+      and tonumber(read(client .. "/child-ready")) ~= old_pids[4]
+  end)
+  for _, pid in ipairs(old_pids) do assert(vim.uv.kill(pid, 0) == nil, "Old process survived restart") end
+  runner.execute("run")
+  runner.stop()
+  settled()
+  assert(#fn.readfile(server .. "/starts") == 2 and #fn.readfile(client .. "/starts") == 2,
+    "Stop did not cancel a multiple-command restart")
+  outputs = runner.terminals()
+  assert(runner.reserves(outputs[2].id), "Finished output ID was not reserved")
+  for _, toggle in ipairs({ runner.toggle, toggle_all }) do
+    toggle()
+    assert(not outputs[1]:is_open() and not outputs[2]:is_open(), "Did not hide both outputs")
+    toggle()
+    assert(outputs[1]:is_open() and outputs[2]:is_open(), "Did not restore both finished outputs")
+  end
+  assert(#fn.readfile(server .. "/starts") == 2 and #fn.readfile(client .. "/starts") == 2,
+    "Restoring finished output reran commands")
+  assert(vim.uv.kill(fn.jobpid(occupied.job_id), 0) == 0, "Stopped an unrelated shell")
+  occupied:shutdown()
+  api.nvim_set_current_win(source_window)
+  vim.cmd.stopinsert()
+
+  -- A failed run command leaves its sibling alive, and stop still reaches it.
+  local survivor = project .. "/survivor"
+  fn.mkdir(survivor, "p")
+  configure("", { command("build", "9 0"), command("serve", nil, survivor) })
+  runner.execute("run")
+  wait_for("failed command and surviving sibling", function()
+    return read(survivor .. "/child-ready") ~= "" and vim.iter(messages):any(function(item)
+      return item.message == "run 1 exited with code 9"
+    end)
+  end)
+  local survivor_pid = tonumber(read(survivor .. "/starts"))
+  local survivor_child = tonumber(read(survivor .. "/child-ready"))
+  assert(vim.uv.kill(survivor_pid, 0) == 0, "Failure stopped the other command")
+  runner.stop()
+  settled()
+  assert(vim.uv.kill(survivor_pid, 0) == nil and vim.uv.kill(survivor_child, 0) == nil,
+    "Stop missed a surviving command or its child")
 
   -- Settings persist across module reloads and stay separate for each project.
   configure("", command("run"))

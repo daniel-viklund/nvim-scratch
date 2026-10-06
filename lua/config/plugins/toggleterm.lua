@@ -46,7 +46,7 @@ vim.keymap.set("n", "<leader>t3", "<cmd>3ToggleTerm<CR>", {
   desc = "Terminal 3",
 })
 
--- Terminal 4 is reserved for the project runner.
+-- The project runner reserves terminal 4 and any additional command outputs.
 require("config.runner").setup()
 
 -- Remember the visible set in each tab, including finished project output.
@@ -55,9 +55,10 @@ vim.keymap.set("n", "<leader>tt", function()
   local api = vim.api
   local tab = api.nvim_get_current_tabpage()
   local candidates = require("toggleterm.terminal").get_all(true)
-  local project = require("config.runner").terminal()
-  if project and not vim.tbl_contains(candidates, project) then
-    candidates[#candidates + 1] = project
+  for _, project in ipairs(require("config.runner").terminals()) do
+    if not vim.tbl_contains(candidates, project) then
+      candidates[#candidates + 1] = project
+    end
   end
   local visible = {}
   for _, term in ipairs(candidates) do
@@ -88,7 +89,7 @@ end, { desc = "Toggle visible terminals" })
 vim.keymap.set("n", "<leader>tn", function()
   local terminals = require("toggleterm.terminal")
   local id = 1
-  while id == 4 or terminals.get(id, true) do id = id + 1 end
+  while require("config.runner").reserves(id) or terminals.get(id, true) do id = id + 1 end
   terminals.Terminal:new({ count = id }):toggle()
 end, {
   desc = "New terminal",

@@ -57,25 +57,37 @@ the extra cursors and search highlighting.
 
 ## Build and run
 
-Use `Space tc` to set any shell **build command**, **run command**, and
+Use `Space pc` to set any shell **build command**, **run commands**, and
 **working directory** for the current project. These can invoke any tool or
 script; no language-specific runner or extra plugin is required. The first
 build/run also prompts if its command is missing. Leave build blank for projects
-that only need a run command, or run blank for build-only projects.
+that only need a run command, or the first run command blank for build-only
+projects. Enter each run command separately; leave the next command blank to
+finish. Each command launches concurrently in its own output terminal.
+
+For a CMake client/server project, enter `cmake --build build` as the build
+command, `./build/server` as run command 1, and `./build/client` as run command 2.
+Leave run command 3 blank and use `.` as the working directory. Keep each
+executable in the foreground; no `&` or `wait` is needed. Commands start in order
+but do not wait for server readiness, so the client may need connection retries.
+Shell operators inside a single command keep their usual meaning: `&&` waits
+for success and does not create separate terminals.
 
 | Mapping (Normal mode) | Action |
 | --- | --- |
-| `Space tb` | Build |
-| `Space tr` | Run, or stop and restart the current command |
-| `Space tR` | Stop, build, then run only if the build succeeds; skip an empty build command |
-| `Space tx` | Stop, including any pending restart or build/run sequence |
-| `Space tc` | Configure this project's commands |
-| `Space t4` | Show/hide the latest build/run output |
+| `Space pb` | Build |
+| `Space pr` | Run, or stop and restart all current run commands |
+| `Space pR` | Stop all commands, build, then run only if the build succeeds; skip an empty build command |
+| `Space px` | Stop all commands, including any pending restart or build/run sequence |
+| `Space pc` | Configure this project's commands |
+| `Space t4` | Show/hide all latest build/run outputs |
 
-Terminal **4** is reserved for this runner. Terminals 1–3 remain ordinary shells;
-`Space tn` skips 4 when creating another shell. Only one runner command is active
-at a time. A new build/run replaces it after it exits. Output stays visible when
-a command finishes or fails, until the next command starts. Launching shows the
+Terminal **4** is reserved for this runner. Additional run commands use free
+terminal numbers above 4, leaving existing shells alone. Terminals 1–3 remain
+ordinary shells; `Space tn` skips all runner outputs, including finished ones.
+A new build/run replaces the current set after every process exits. Output
+stays visible when a command finishes or fails, until the next build/run starts.
+One run command exiting does not stop the others. Launching shows the
 output and returns focus to your source window. Navigate to the terminal with
 your window mappings and press `i` for interactive input; `jk` returns to Normal
 mode. Opening hidden output with `Space t4` also focuses the terminal.
@@ -83,11 +95,10 @@ mode. Opening hidden output with `Space t4` also focuses the terminal.
 Commands run through Neovim's `shell` using files on disk, so save your changes
 first. Build and run are separate processes: put shared environment setup in
 both commands or in a script. Commands should stay in the foreground so the
-runner can stop them. It also stops its active command when Neovim exits.
+runner can stop them. It also stops all active commands when Neovim exits.
 
-Projects are identified by the current file's nearest Git root (including Git
-worktrees), falling back to Neovim's current directory outside Git. In the output
-terminal, shortcuts use the project that produced that output. Working
+Projects are identified by the directory where Neovim was launched, even when
+you edit files elsewhere or change Neovim's current directory. Working
 directories can be absolute or relative to the project root, such as `src/api`.
 Settings are stored locally in `stdpath("data")/project-runner/`, separately for
 each project, and survive Neovim restarts. They do not add files to your repos.
