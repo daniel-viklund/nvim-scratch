@@ -1,6 +1,7 @@
 vim.pack.add({
   "https://github.com/nvim-lua/plenary.nvim",
   "https://github.com/nvim-telescope/telescope.nvim",
+  "https://github.com/nvim-telescope/telescope-ui-select.nvim",
 })
 
 local telescope = require("telescope")
@@ -24,6 +25,11 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 })
 
 telescope.setup({
+  extensions = {
+    ["ui-select"] = require("telescope.themes").get_dropdown({
+      previewer = false,
+    }),
+  },
   defaults = {
     layout_strategy = "vertical",
     layout_config = {
@@ -39,6 +45,9 @@ telescope.setup({
     },
   },
 })
+
+-- Use Telescope for code actions and other vim.ui.select prompts.
+telescope.load_extension("ui-select")
 
 local builtin = require("telescope.builtin")
 

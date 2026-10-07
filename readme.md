@@ -36,6 +36,27 @@ To disable a plugin, rename its file from `.lua` to `.lua.disabled` and restart.
 Snacks is already disabled this way. To enable it, rename `snacks.lua.disabled`
 back to `snacks.lua`. Disabled plugins stay installed and in the lockfile.
 
+## Sessions
+
+[AutoSession](https://github.com/rmagatti/auto-session) automatically saves your
+open files (including hidden buffers), editor splits and their sizes, tabs,
+folds, and cursor positions when you quit Neovim. Launch `nvim` or `nvim .` in
+the same directory to restore that session. Each working directory has its own
+session; the home directory and filesystem root are excluded.
+
+| Mapping | Action |
+| --- | --- |
+| `Space ss` | Find and switch sessions with Telescope (saves the current session first) |
+| `Space ws` | Save the current layout now |
+| `Space wr` | Restore the session for the current directory |
+
+Terminal panes, their output, and running processes are not restored. Sessions
+remember file locations and layout, not unsaved file contents; save edits with
+`:w` or `:wa` as usual. Opening another file adds it to the current workspace;
+use `Space ws` for an immediate checkpoint. Launching `nvim filename` skips
+automatic session restore and saving, so a quick edit leaves the saved workspace
+intact. Use `:AutoSession disable` to skip saving for the rest of a run.
+
 ## Multiple cursors
 
 `lua/config/plugins/multicursor.lua` configures
@@ -54,6 +75,21 @@ the extra cursors and search highlighting.
 | `Space mj` / `Space mk` | Add a cursor below / above |
 | `Space mn` / `Space mN` | Add the next / previous matching word or selection |
 | `Space ma` | Add cursors at all matching words or selections |
+
+## Window splits
+
+Use `Space w h/j/k/l` to carry the current file into a new split to the
+left/below/above/right. The original window shows its previous file (Neovim's
+alternate buffer), and focus stays on the current file in the new split. For
+example, open file A, then file B in the same window, and press `Space w l`:
+A stays on the left and B moves to the right. Unsaved edits are preserved.
+If there is no previous ordinary file buffer, the shortcut shows a message
+without opening a split.
+
+Use `Ctrl-h/j/k/l` to navigate windows. Native `Ctrl-w v` and `Ctrl-w s` show
+the same buffer in two windows, useful for viewing different parts of one file.
+Native `Ctrl-w H/J/K/L` moves an existing window to the corresponding edge.
+Use `Ctrl-w c` to close a window and `Ctrl-w =` to equalize window sizes.
 
 ## Build and run
 
